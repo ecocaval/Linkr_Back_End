@@ -2,6 +2,7 @@ import connection from "../config/database.connection.js";
 
 export async function publishPost(req, res) {
     // const {id} = res.locals.user;
+    const id = 1
     const {description, link} = req.body
 
     try {
