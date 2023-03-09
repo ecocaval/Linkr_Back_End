@@ -50,7 +50,7 @@ export async function signIn(req, res) {
 			{ expiresIn: 32300 }
 		);
 
-		res.send({ token });
+		res.send({ token, userId: hasUser.rows[0].password });
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
