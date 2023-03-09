@@ -25,6 +25,7 @@ export async function getPosts (req, res) {
 
         for (let i = 0; i < posts.rows.length; i++) {
             let urlInfos = await getLinkPreview(posts.rows[i].link)
+            let likesCount = await connection.query('SELECT count(*) FROM posts_likes where post_id = $1;', [posts.rows[i].id])
 
             let user = await connection.query('SELECT * FROM users WHERE id = $1;', [posts.rows[i].user_id])
 
@@ -32,6 +33,7 @@ export async function getPosts (req, res) {
                 userName: user.rows[0].name,
                 userImage: user.rows[0].picture_url,
                 postDesc: posts.rows[i].description,
+                likesCount: likesCount.rows[0].count,
                 linkData: {
                     url: urlInfos.url,
                     title: urlInfos.title,
