@@ -2,11 +2,40 @@ import connection from "../config/database.connection.js"
 import { getLinkPreview, getPreviewFromContent } from "link-preview-js"
 
 export async function publishPost(req, res) {
-    // const {id} = res.locals.user;
-    const id = 1
+    const {userId: id} = res.locals;
     const {description, link} = req.body
 
+    let descriptionCopy = description
+
+    if(!descriptionCopy){
+        descriptionCopy = null
+    }
+
     try {
+        if(description !== ""){
+            const hashtags = description.match(/#\w+\s*/g)?.map(hashtag => hashtag.trim().slice(1).toLowerCase());
+    
+            if (hashtags && hashtags.length > 0) {
+                for (const name of hashtags) {
+                    const {rowCount} = await connection.query(`
+                    SELECT * FROM hashtags WHERE name = $1
+                    `, [name])
+    
+                    if(rowCount < 1){
+                        await connection.query(`
+                        INSERT INTO hashtags (name, mentions_count) VALUES ($1, $2)
+                    `, [name, 1])
+                    }
+    
+                    if(rowCount > 0){
+                        await connection.query(`
+                        UPDATE hashtags SET mentions_count = mentions_count + 1 WHERE name = $1
+                        `, [name])   
+                    }
+                }
+              }
+        }
+    
         await connection.query(`
         INSERT INTO posts (user_id, description, link)
         VALUES ($1, $2, $3)
