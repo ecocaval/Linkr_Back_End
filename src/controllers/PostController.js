@@ -2,7 +2,7 @@ import connection from "../config/database.connection.js"
 import { getLinkPreview, getPreviewFromContent } from "link-preview-js"
 
 export async function publishPost(req, res) {
-    const {userId: id} = res.locals;
+    const {userId: id} = req.locals;
     const {description, link} = req.body
 
     let descriptionCopy = description
