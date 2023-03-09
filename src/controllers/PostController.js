@@ -6,6 +6,12 @@ export async function publishPost(req, res) {
     const id = 1
     const {description, link} = req.body
 
+    let descriptionCopy = description
+
+    if(!descriptionCopy){
+        descriptionCopy = null
+    }
+    
     try {
         await connection.query(`
         INSERT INTO posts (user_id, description, link)
