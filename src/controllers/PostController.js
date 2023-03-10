@@ -77,3 +77,29 @@ export async function getPosts (req, res) {
         res.status(500).send(error)
     }
 }
+
+export async function toggleLike(req, res){
+    let { post_id, user_id } = req.body
+    const { userId } = req.locals;
+
+    try {
+        let user = await connection.query('SELECT * FROM users WHERE id = $1;', [user_id])
+        let post = await connection.query('SELECT * FROM posts WHERE id = $1;', [post_id])
+
+        if(user.rows.length === 0 || post.rows.length === 0) return res.sendStatus(400)
+
+        if( userId != user_id ) return res.sendStatus(401)
+
+        let likes_posts = await connection.query('SELECT * FROM posts_likes WHERE user_id = $1 AND post_id = $2;', [user_id, post_id])
+
+        if(likes_posts.rows.length > 0) { // remove like
+            await connection.query('DELETE FROM posts_likes WHERE user_id = $1 AND post_id = $2;', [user_id, post_id])
+        } else { // add like
+            await connection.query('INSERT INTO posts_likes (user_id, post_id) VALUES ($1, $2);', [user_id, post_id])
+        }
+
+        res.sendStatus(200)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+}
