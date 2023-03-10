@@ -38,6 +38,8 @@ export async function signIn(req, res) {
 			[email]
 		);
 
+		const userId = hasUser.rows[0].id
+
 		if (hasUser.rowCount === 0)
 			return res.status(401).send('Email ou senha inválidos');
 
@@ -45,12 +47,12 @@ export async function signIn(req, res) {
 			return res.status(401).send('Email ou senha inválidos');
 
 		const token = jwt.sign(
-			{ userId: hasUser.rows[0].id },
+			{ userId },
 			process.env.SECRET_KEY,
 			{ expiresIn: 32300 }
 		);
 
-		res.send({ token, userId: hasUser.rows[0].password });
+		res.send({ token, userId });
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
