@@ -92,7 +92,8 @@ export async function getPosts(req, res) {
 
       data.push({
         userName: user.rows[0].name,
-        userCanDelete: userId === posts.rows[i].user_id,
+        userCanDeletePost: userId === posts.rows[i].user_id,
+        userId: posts.rows[i].user_id,
         userImage: user.rows[0].picture_url,
         postId: posts.rows[i].id,
         postDesc: posts.rows[i].description,
