@@ -13,8 +13,7 @@ export async function publishPost(req, res) {
 
     try {
         if(description !== ""){
-            const hashtags = description.match(/#[\p{L}\d_\-]+\s*/)?.map(hashtag => hashtag.trim().slice(1).toLowerCase());
-    
+            const hashtags = description.match(/#\w+(-\w+)*/g)?.map(hashtag => hashtag.trim().slice(1).toLowerCase());
             if (hashtags && hashtags.length > 0) {
                 for (const name of hashtags) {
                     const {rowCount} = await connection.query(`
