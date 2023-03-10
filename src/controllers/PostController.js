@@ -203,3 +203,22 @@ export async function toggleLike(req, res) {
         res.status(500).send(error);
     }
 }
+
+export async function postLiked(req, res) {
+    let { post_id, user_id } = req.body;
+  
+    try {
+      let likes_posts = await connection.query(
+        "SELECT * FROM posts_likes WHERE user_id = $1 AND post_id = $2;",
+        [user_id, post_id]
+      );
+  
+      if (likes_posts.rows.length > 0) {
+        res.status(200).send(true);
+      } else {
+        res.status(200).send(false);
+      }
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
