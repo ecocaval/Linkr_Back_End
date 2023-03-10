@@ -88,8 +88,6 @@ export async function getPosts(req, res) {
         posts = await connection.query("SELECT * FROM posts ORDER BY id DESC;");        
     }
 
-    // console.log(posts)
-
     for (let i = 0; i < posts.rows.length; i++) {
       const urlInfos = await getLinkPreview(posts.rows[i].link);
 
