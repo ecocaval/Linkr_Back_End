@@ -81,11 +81,11 @@ export async function getPosts(req, res) {
     let posts
 
     if (getMyUser) {
-        posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC;", [userId]);        
+        posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC LIMIT 20;", [userId]);        
     } else if (hashtag) {
-        posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC;", [`%#${hashtag}%`]);
+        posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC LIMIT 20;", [`%#${hashtag}%`]);
     } else {
-        posts = await connection.query("SELECT * FROM posts ORDER BY id DESC;");        
+        posts = await connection.query("SELECT * FROM posts ORDER BY id DESC LIMIT 20;");        
     }
 
     for (let i = 0; i < posts.rows.length; i++) {
@@ -119,6 +119,7 @@ export async function getPosts(req, res) {
     }
   } catch (e) {
     console.error(e);
+    res.status(500).send(e.message)
   }
   return res.status(200).send(data);
 }
