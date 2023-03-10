@@ -72,21 +72,21 @@ export async function publishPost(req, res) {
 }
 
 export async function getPosts(req, res) {
-    const data = [];
-    const { userId } = req.locals;
-    const { hashtag } = req.query;
-    const { getMyUser } = req.query;
+  const data = [];
+  const { userId } = req.locals;
+  const { hashtag } = req.query;
+  const { getMyUser } = req.query;
 
-    try {
-        let posts
+  try {
+    let posts
 
-        if (getMyUser) {
-            posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC;", [userId]);
-        } else if (hashtag) {
-            posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC;", [`%#${hashtag}%`]);
-        } else {
-            posts = await connection.query("SELECT * FROM posts ORDER BY id DESC;");
-        }
+    if (getMyUser) {
+        posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC LIMIT 20;", [userId]);        
+    } else if (hashtag) {
+        posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC LIMIT 20;", [`%#${hashtag}%`]);
+    } else {
+        posts = await connection.query("SELECT * FROM posts ORDER BY id DESC LIMIT 20;");        
+    }
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
@@ -117,10 +117,11 @@ export async function getPosts(req, res) {
                 },
             });
         }
-    } catch (e) {
-        console.error(e);
-    }
-    return res.status(200).send(data);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send(e.message)
+  }
+  return res.status(200).send(data);
 }
 
 export async function getPostById(postId) {
