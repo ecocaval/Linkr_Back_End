@@ -140,7 +140,7 @@ export async function editPost(req, res) {
     const { description } = req.body
     if (!description) return res.sendStatus(204)
     try {
-        const response = await connection.query(`UPDATE posts SET description = $1 WHERE id = $2;`, [`'${description}'`, postId]);
+        const response = await connection.query(`UPDATE posts SET description = $1 WHERE id = $2;`, [`${description}`, postId]);
         if (response.rowCount === 0) return res.sendStatus(404);
         return res.sendStatus(200);
     } catch (error) {
