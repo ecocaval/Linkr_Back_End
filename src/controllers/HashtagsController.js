@@ -5,6 +5,7 @@ export async function getHashtags(req, res) {
         const hashtags = await connection.query(`
                 SELECT h.name, h.mentions_count as "mentionsCount"
                 FROM hashtags h
+                WHERE h.mentions_count > 0
                 ORDER BY h.mentions_count DESC
                 LIMIT 10;
             `
