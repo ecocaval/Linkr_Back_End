@@ -72,21 +72,21 @@ export async function publishPost(req, res) {
 }
 
 export async function getPosts(req, res) {
-  const data = [];
-  const { userId } = req.locals;
-  const { hashtag } = req.query;
-  const { getMyUser } = req.query;
+    const data = [];
+    const { userId } = req.locals;
+    const { hashtag } = req.query;
+    const { getMyUser } = req.query;
 
-  try {
-    let posts
+    try {
+        let posts
 
-    if (getMyUser) {
-        posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC LIMIT 20;", [userId]);        
-    } else if (hashtag) {
-        posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC LIMIT 20;", [`%#${hashtag}%`]);
-    } else {
-        posts = await connection.query("SELECT * FROM posts ORDER BY id DESC LIMIT 20;");        
-    }
+        if (getMyUser) {
+            posts = await connection.query("SELECT * FROM posts WHERE user_id = $1 ORDER BY id DESC LIMIT 20;", [userId]);
+        } else if (hashtag) {
+            posts = await connection.query("SELECT * FROM posts WHERE description LIKE $1 ORDER BY id DESC LIMIT 20;", [`%#${hashtag}%`]);
+        } else {
+            posts = await connection.query("SELECT * FROM posts ORDER BY id DESC LIMIT 20;");
+        }
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
@@ -117,11 +117,11 @@ export async function getPosts(req, res) {
                 },
             });
         }
-  } catch (e) {
-    console.error(e);
-    return res.status(500).send(e.message)
-  }
-  return res.status(200).send(data);
+    } catch (e) {
+        console.error(e);
+        return res.status(500).send(e.message)
+    }
+    return res.status(200).send(data);
 }
 
 export async function getPostById(postId) {
@@ -152,10 +152,29 @@ export async function editPost(req, res) {
 export async function deletePost(req, res) {
     const { postId } = req.params;
     try {
-        const response = await connection.query(`DELETE FROM posts WHERE id = $1`, [
-            postId,
-        ]);
-        if (response.rowCount === 0) return res.sendStatus(404);
+        const { rows: hashtagIds } = await connection.query(
+            `
+                SELECT hashtag_id as "hashtagId" FROM posts_hashtags WHERE post_id = $1
+            `,
+            [postId]
+        );
+
+        hashtagIds.forEach(async ({ hashtagId }) => {
+            await connection.query(
+                `
+                    UPDATE hashtags SET mentions_count = mentions_count - 1 WHERE id = $1
+                `,
+                [hashtagId]
+            );
+        })
+
+        const { rowCount: NoProblemInDelete } = await connection.query(
+            `
+                DELETE FROM posts WHERE id = $1
+            `,
+            [postId]
+        );
+        if (!NoProblemInDelete) return res.sendStatus(404);
         return res.status(200).send();
     } catch (error) {
         res.status(500).send(error);
@@ -206,19 +225,19 @@ export async function toggleLike(req, res) {
 
 export async function postLiked(req, res) {
     let { post_id, user_id } = req.body;
-  
+
     try {
-      let likes_posts = await connection.query(
-        "SELECT * FROM posts_likes WHERE user_id = $1 AND post_id = $2;",
-        [user_id, post_id]
-      );
-  
-      if (likes_posts.rows.length > 0) {
-        res.status(200).send(true);
-      } else {
-        res.status(200).send(false);
-      }
+        let likes_posts = await connection.query(
+            "SELECT * FROM posts_likes WHERE user_id = $1 AND post_id = $2;",
+            [user_id, post_id]
+        );
+
+        if (likes_posts.rows.length > 0) {
+            res.status(200).send(true);
+        } else {
+            res.status(200).send(false);
+        }
     } catch (error) {
-      res.status(500).send(error);
+        res.status(500).send(error);
     }
-  }
+}
