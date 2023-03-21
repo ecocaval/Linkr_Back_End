@@ -38,7 +38,7 @@ export async function signIn(req, res) {
 			[email]
 		);
 
-		const userId = hasUser.rows[0].id
+		const userId = hasUser.rows[0]?.id
 
 		if (hasUser.rowCount === 0)
 			return res.status(401).send('Email ou senha inválidos');
