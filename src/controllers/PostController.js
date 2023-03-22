@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, deletePostById, getPostComments, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -152,6 +152,27 @@ export async function postLiked(req, res) {
         } else {
             res.status(200).send(false);
         }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
+export async function getComments(req, res) {
+    let { postId } = req.params
+
+    try {
+        let comments = await getPostComments(postId)
+        res.status(200).send(comments.rows) 
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
+export async function addComment(req, res) {
+    let { description, post_id, user_id } = req.params
+
+    try {
+        
     } catch (error) {
         res.status(500).send(error);
     }
