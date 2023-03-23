@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, deletePostById, getPostComments, getPostsById, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -41,12 +41,14 @@ export async function getPosts(req, res) {
     const { userId } = req.locals;
     const { hashtag } = req.query;
     const { getMyUser } = req.query;
+    const {id} = req.params
 
     try {
         let posts
 
         if (getMyUser) posts = await selectPostsByUserId(userId)
         else if (hashtag) posts = await selectPostsByHashtag(hashtag)
+        else if(id) posts = await getPostsById(id)
         else posts = await selectPosts()
 
         for (let i = 0; i < posts.rows.length; i++) {
