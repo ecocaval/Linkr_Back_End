@@ -7,7 +7,7 @@ import { postSchema } from '../schemas/PostSchema.js'
 
 const postRouter = Router()
 
-postRouter.get("/posts", validateToken, getPosts)
+postRouter.get("/posts/:id?", validateToken, getPosts)
 postRouter.post("/posts/new", validateToken, validateSchema(postSchema), publishPost)
 postRouter.post("/posts/toggle-like", validateToken, toggleLike)
 postRouter.post("/posts/liked", postLiked)
