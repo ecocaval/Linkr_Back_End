@@ -99,6 +99,14 @@ export async function removeLikeFromPost(userId, postId) {
     `, [userId, postId]);
 }
 
+export async function getPostComments(postId) {
+    return await connection.query(`
+        SELECT * FROM comments
+        WHERE post_id = $1
+    `, [postId]);
+}
+
+
 export async function getPostsById(userId) {
     if (!userId) return []
     return await connection.query(`
@@ -107,3 +115,4 @@ export async function getPostsById(userId) {
         WHERE user_id = $1;
     `, [userId]);
 }
+
