@@ -39,17 +39,16 @@ export async function publishPost(req, res) {
 export async function getPosts(req, res) {
     const data = [];
     const { userId } = req.locals;
-    const { hashtag } = req.query;
-    const { getMyUser } = req.query;
-    const {id} = req.params
+    const { hashtag, getMyUser, postsOffset } = req.query;
+    const { id } = req.params
 
     try {
         let posts
 
         if (getMyUser) posts = await selectPostsByUserId(userId)
         else if (hashtag) posts = await selectPostsByHashtag(hashtag)
-        else if(id) posts = await getPostsById(id)
-        else posts = await selectPosts()
+        else if (id) posts = await getPostsById(id)
+        else posts = await selectPosts(postsOffset)
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
@@ -164,7 +163,7 @@ export async function getComments(req, res) {
 
     try {
         let comments = await getPostComments(postId)
-        res.status(200).send(comments.rows) 
+        res.status(200).send(comments.rows)
     } catch (error) {
         res.status(500).send(error);
     }
@@ -174,7 +173,7 @@ export async function addComment(req, res) {
     let { description, post_id, user_id } = req.params
 
     try {
-        
+
     } catch (error) {
         res.status(500).send(error);
     }
