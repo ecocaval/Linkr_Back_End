@@ -9,13 +9,14 @@ export async function insertPost(id, description, link) {
     `, [id, description, link]);
 }
 
-export async function selectPosts() {
+export async function selectPosts(postsOffset) {
     return await connection.query(`
         SELECT * 
         FROM posts 
         ORDER BY id DESC 
-        LIMIT 20;
-    `);
+        LIMIT 10
+        OFFSET $1;
+    `, [postsOffset ? 10 * postsOffset : postsOffset]);
 }
 
 export async function selectPostById(postId) {
