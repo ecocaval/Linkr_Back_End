@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, getPostsById, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, deletePostById, getPostComments, getPostsById, getPostsByIdWithLimit, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -39,16 +39,22 @@ export async function publishPost(req, res) {
 export async function getPosts(req, res) {
     const data = [];
     const { userId } = req.locals;
-    const { hashtag, getMyUser, postsOffset } = req.query;
+    const { hashtag, limit, postsOffset } = req.query;
     const { id } = req.params
 
     try {
         let posts
 
-        if (getMyUser) posts = await selectPostsByUserId(userId)
-        else if (hashtag) posts = await selectPostsByHashtag(hashtag)
-        else if (id) posts = await getPostsById(id)
-        else posts = await selectPosts(postsOffset)
+        if (id) {
+            if (!limit) posts = await getPostsById(id)
+            else posts = await getPostsById(id, limit)
+        }
+        else if (hashtag) {
+            posts = await selectPostsByHashtag(hashtag)
+        }
+        else {
+            posts = await selectPosts(postsOffset)
+        }
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);

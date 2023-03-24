@@ -28,7 +28,7 @@ export async function selectPostById(postId) {
     `, [postId]);
 }
 
-export async function selectPostsByUserId(userId) {
+export async function getPostsByIdWithLimit(userId) {
     if (!userId) return []
     return await connection.query(`
         SELECT * 
@@ -108,12 +108,14 @@ export async function getPostComments(postId) {
 }
 
 
-export async function getPostsById(userId) {
+export async function getPostsById(userId, limit) {
     if (!userId) return []
     return await connection.query(`
         SELECT * 
         FROM posts 
-        WHERE user_id = $1;
+        WHERE user_id = $1
+        ORDER BY id DESC 
+        ${limit ? 'LIMIT 20' : ''};
     `, [userId]);
 }
 
