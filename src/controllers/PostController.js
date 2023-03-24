@@ -48,12 +48,14 @@ export async function getPosts(req, res) {
         if (getMyUser) posts = await selectPostsByUserId(userId)
         else if (hashtag) posts = await selectPostsByHashtag(hashtag)
         else if (id) posts = await getPostsById(id)
-        else posts = await selectPosts(postsOffset)
+        else posts = await selectPosts(postsOffset, userId)
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
             const likesCount = await selectLikesCountByPostId(posts.rows[i].id)
             const user = await selectUserById(posts.rows[i].user_id)
+
+            console.log(posts.rows.likedByUser)
 
             data.push({
                 userName: user.rows[0].name,
@@ -63,6 +65,7 @@ export async function getPosts(req, res) {
                 postId: posts.rows[i].id,
                 postDesc: posts.rows[i].description,
                 likesCount: likesCount.rows[0].count,
+                likedByUser: posts.rows[i].likedByUser,
                 linkData: {
                     url: urlInfos.url,
                     title: urlInfos.title,
@@ -75,6 +78,7 @@ export async function getPosts(req, res) {
         console.error(e);
         return res.status(500).send(e.message)
     }
+    console.log(data)
     return res.status(200).send(data);
 }
 

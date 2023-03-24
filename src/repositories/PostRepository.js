@@ -9,14 +9,20 @@ export async function insertPost(id, description, link) {
     `, [id, description, link]);
 }
 
-export async function selectPosts(postsOffset) {
+export async function selectPosts(postsOffset, userId) {
     return await connection.query(`
-        SELECT * 
-        FROM posts 
+        SELECT p.* ,
+        CASE 
+            WHEN pl.user_id = $1 THEN true
+            ELSE false
+        END AS "likedByUser"
+        FROM posts p
+        JOIN posts_likes pl
+            ON pl.post_id = p.id
         ORDER BY id DESC 
         LIMIT 10
-        OFFSET $1;
-    `, [postsOffset ? 10 * postsOffset : postsOffset]);
+        OFFSET $2;
+    `, [userId, postsOffset ? 10 * postsOffset : postsOffset]);
 }
 
 export async function selectPostById(postId) {
