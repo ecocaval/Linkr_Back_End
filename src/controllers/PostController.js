@@ -1,7 +1,27 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, getPostsById, getPostsByIdWithLimit, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
-import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
+import {
+    addLikeToPost,
+    deletePostById,
+    getPostComments,
+    getPostsById,
+    insertPost,
+    removeLikeFromPost,
+    selectLikesCountByPostId,
+    selectPostById,
+    selectPosts,
+    selectPostsByHashtag,
+    selectPostsLikes,
+    updatePostById
+} from "../repositories/PostRepository.js";
+import {
+    createHashtag,
+    decreaseHashtagMentionsCount,
+    linkPostToHashtag,
+    selectHashtagsByName,
+    selectHashtagsIdFromPost,
+    updateHashtagMentionsByName
+} from "../repositories/HashtagRepository.js";
 
 export async function publishPost(req, res) {
     const { userId: id } = req.locals

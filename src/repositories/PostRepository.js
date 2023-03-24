@@ -28,17 +28,6 @@ export async function selectPostById(postId) {
     `, [postId]);
 }
 
-export async function getPostsByIdWithLimit(userId) {
-    if (!userId) return []
-    return await connection.query(`
-        SELECT * 
-        FROM posts 
-        WHERE user_id = $1 
-        ORDER BY id DESC 
-        LIMIT 20;
-    `, [userId]);
-}
-
 export async function selectPostsByHashtag(hashtag) {
     if (!hashtag) return []
     return await connection.query(`
