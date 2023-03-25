@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, getPostsById, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -176,5 +176,19 @@ export async function addComment(req, res) {
 
     } catch (error) {
         res.status(500).send(error);
+    }
+}
+
+export async function sharePost(req, res) {
+    const { userId, postId } = req.body
+
+    try {
+        const {rows: [{user_id: sharedUserId, description, link}]} = await getSharePost(postId)
+        await insertSharePost(sharedUserId, description, link, userId, postId)
+
+        res.send({userId, postId})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error.message)
     }
 }

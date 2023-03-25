@@ -117,3 +117,19 @@ export async function getPostsById(userId) {
     `, [userId]);
 }
 
+export async function getSharePost(postId) {
+    if (!postId) return
+    return await connection.query(`
+        SELECT *
+        FROM posts
+        WHERE id = $1;
+    `, [postId])
+}
+
+export async function insertSharePost(sharedUserId, description, link, userId, postId) {
+    if (!sharedUserId || !description || !link || !userId || !postId) return
+    return await connection.query(`
+        INSERT INTO posts (user_id, description, link, is_shared, shared_user_id, shared_post_id)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `, [sharedUserId, description, link, true, userId, postId])
+}
