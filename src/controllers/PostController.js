@@ -55,8 +55,6 @@ export async function getPosts(req, res) {
             const likesCount = await selectLikesCountByPostId(posts.rows[i].id)
             const user = await selectUserById(posts.rows[i].user_id)
 
-            console.log(posts.rows.likedByUser)
-
             data.push({
                 userName: user.rows[0].name,
                 userCanDeletePost: userId === posts.rows[i].user_id,
@@ -78,7 +76,6 @@ export async function getPosts(req, res) {
         console.error(e);
         return res.status(500).send(e.message)
     }
-    console.log(data)
     return res.status(200).send(data);
 }
 
@@ -97,10 +94,11 @@ export async function editPost(req, res) {
     const { description } = req.body
     if (!description) return res.sendStatus(204)
     try {
-        const { rowCount: updatedSucessFully } = await updatePostById(postId, description)
+        const {rowCount: updatedSucessFully} = await updatePostById(postId, description)
         if (!updatedSucessFully) return res.sendStatus(404);
         return res.sendStatus(200);
     } catch (error) {
+        console.error(error)
         res.status(500).send(error);
     }
 }

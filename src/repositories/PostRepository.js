@@ -17,7 +17,7 @@ export async function selectPosts(postsOffset, userId) {
             ELSE false
         END AS "likedByUser"
         FROM posts p
-        JOIN posts_likes pl
+        LEFT JOIN posts_likes pl
             ON pl.post_id = p.id
         ORDER BY id DESC 
         LIMIT 10
@@ -84,7 +84,7 @@ export async function addLikeToPost(userId, postId) {
 
 export async function updatePostById(postId, description) {
     if (!postId || !description) return
-    await connection.query(`
+    return await connection.query(`
         UPDATE posts 
         SET description = $1 
         WHERE id = $2;
