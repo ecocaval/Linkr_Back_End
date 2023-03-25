@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, getPostsById, insertPost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -54,6 +54,7 @@ export async function getPosts(req, res) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
             const likesCount = await selectLikesCountByPostId(posts.rows[i].id)
             const user = await selectUserById(posts.rows[i].user_id)
+            const sharedUser = await selectUserById(posts.rows[i].shared_user_id)
 
             data.push({
                 userName: user.rows[0].name,
@@ -62,6 +63,8 @@ export async function getPosts(req, res) {
                 userImage: user.rows[0].image,
                 postId: posts.rows[i].id,
                 postDesc: posts.rows[i].description,
+                isShared: posts.rows[i].is_shared,
+                sharedUser: sharedUser.rowCount === 0 ? null : sharedUser.rows[0].name,
                 likesCount: likesCount.rows[0].count,
                 likedByUser: posts.rows[i].likedByUser,
                 linkData: {
@@ -178,5 +181,19 @@ export async function addComment(req, res) {
 
     } catch (error) {
         res.status(500).send(error);
+    }
+}
+
+export async function sharePost(req, res) {
+    const { userId, postId } = req.body
+
+    try {
+        const {rows: [{user_id: sharedUserId, description, link}]} = await getSharePost(postId)
+        await insertSharePost(sharedUserId, description, link, userId, postId)
+
+        res.send({userId, postId})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error.message)
     }
 }
