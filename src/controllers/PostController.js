@@ -54,6 +54,7 @@ export async function getPosts(req, res) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
             const likesCount = await selectLikesCountByPostId(posts.rows[i].id)
             const user = await selectUserById(posts.rows[i].user_id)
+            const sharedUser = await selectUserById(posts.rows[i].shared_user_id)
 
             data.push({
                 userName: user.rows[0].name,
@@ -62,6 +63,8 @@ export async function getPosts(req, res) {
                 userImage: user.rows[0].image,
                 postId: posts.rows[i].id,
                 postDesc: posts.rows[i].description,
+                isShared: posts.rows[i].is_shared,
+                sharedUser: sharedUser.rowCount === 0 ? null : sharedUser.rows[0].name,
                 likesCount: likesCount.rows[0].count,
                 likedByUser: posts.rows[i].likedByUser,
                 linkData: {
