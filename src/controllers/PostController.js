@@ -48,7 +48,7 @@ export async function getPosts(req, res) {
         if (getMyUser) posts = await selectPostsByUserId(userId)
         else if (hashtag) posts = await selectPostsByHashtag(hashtag)
         else if (id) posts = await getPostsById(id)
-        else posts = await selectPosts(postsOffset)
+        else posts = await selectPosts(postsOffset, userId)
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
@@ -63,6 +63,7 @@ export async function getPosts(req, res) {
                 postId: posts.rows[i].id,
                 postDesc: posts.rows[i].description,
                 likesCount: likesCount.rows[0].count,
+                likedByUser: posts.rows[i].likedByUser,
                 linkData: {
                     url: urlInfos.url,
                     title: urlInfos.title,
@@ -93,10 +94,11 @@ export async function editPost(req, res) {
     const { description } = req.body
     if (!description) return res.sendStatus(204)
     try {
-        const { rowCount: updatedSucessFully } = await updatePostById(postId, description)
+        const {rowCount: updatedSucessFully} = await updatePostById(postId, description)
         if (!updatedSucessFully) return res.sendStatus(404);
         return res.sendStatus(200);
     } catch (error) {
+        console.error(error)
         res.status(500).send(error);
     }
 }
