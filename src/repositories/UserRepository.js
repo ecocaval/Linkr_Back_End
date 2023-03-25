@@ -10,9 +10,12 @@ export async function selectUsers(userId) {
 
 export async function selectUserById(userId) {
     return await connection.query(`
-        SELECT u.id, u.name, u.picture_url as image
+        SELECT u.id, u.name, u.picture_url as image, COUNT(uf.follower_id) as "numberOfFollows"
         FROM users u 
-        WHERE id = $1;
+        LEFT JOIN users_followers uf
+        ON uf.follower_id = u.id
+        WHERE u.id = $1
+        GROUP BY u.id;
     `, [userId])
 }
 
