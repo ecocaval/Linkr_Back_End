@@ -39,15 +39,14 @@ export async function publishPost(req, res) {
 export async function getPosts(req, res) {
     const data = [];
     const { userId } = req.locals;
-    const { hashtag, getMyUser, postsOffset } = req.query;
+    const { hashtag, postsOffset } = req.query;
     const { id } = req.params
 
     try {
         let posts
 
-        if (getMyUser) posts = await selectPostsByUserId(userId)
-        else if (hashtag) posts = await selectPostsByHashtag(hashtag)
-        else if (id) posts = await getPostsById(id)
+        if (hashtag) posts = await selectPostsByHashtag(hashtag)
+        else if (id) posts = await selectPostsByUserId(id)
         else posts = await selectPosts(postsOffset, userId)
 
         for (let i = 0; i < posts.rows.length; i++) {

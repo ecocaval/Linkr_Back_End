@@ -10,8 +10,9 @@ export async function insertPost(id, description, link) {
 }
 
 export async function selectPosts(postsOffset, userId) {
+    if (!userId) return
     return await connection.query(`
-        SELECT p.* ,
+        SELECT DISTINCT p.* ,
         CASE 
             WHEN pl.user_id = $1 THEN true
             ELSE false
@@ -19,6 +20,8 @@ export async function selectPosts(postsOffset, userId) {
         FROM posts p
         LEFT JOIN posts_likes pl
             ON pl.post_id = p.id
+        JOIN users_followers uf
+            ON ((uf.follower_id = $1 AND uf.followed_id = p.user_id) OR p.user_id = $1)
         ORDER BY id DESC 
         LIMIT 10
         OFFSET $2;
