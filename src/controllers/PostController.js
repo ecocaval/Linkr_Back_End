@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById } from "../repositories/PostRepository.js";
+import { addLikeToPost, addNewComment, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, postExists, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById, userExists } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 
@@ -174,10 +174,17 @@ export async function getComments(req, res) {
 }
 
 export async function addComment(req, res) {
-    let { description, post_id, user_id } = req.params
+    let { description, post_id, user_id } = req.body
 
     try {
+        // check if user and post exists
+        let user = await userExists(user_id)
+        let post = await postExists(post_id)
+        if(user.rows.length === 0 || post.rows.length === 0) return res.sendStatus(404)
 
+        await addNewComment(description, post_id, user_id)
+
+        res.sendStatus(201)
     } catch (error) {
         res.status(500).send(error);
     }

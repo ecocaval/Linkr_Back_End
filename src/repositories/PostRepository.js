@@ -135,6 +135,27 @@ export async function getSharePost(postId) {
     `, [postId])
 }
 
+export async function addNewComment(description, postId, userId) {
+    return await connection.query(`
+        INSERT INTO comments (description, post_id, user_id)
+        VALUES ($1, $2, $3)
+    `, [description, postId, userId])
+}
+
+export async function userExists(userId) {
+    return await connection.query(`
+        SELECT * FROM users
+        WHERE id = $1
+    `, [userId])
+}
+
+export async function postExists(postId) {
+    return await connection.query(`
+        SELECT * FROM posts
+        WHERE id = $1
+    `, [postId])
+}
+
 export async function insertSharePost(sharedUserId, description, link, userId, postId) {
     if (!sharedUserId || !description || !link || !userId || !postId) return
     return await connection.query(`
