@@ -4,6 +4,7 @@ import { validateSchema } from '../middlewares/ValidateSchema.js'
 import { validateToken } from '../middlewares/ValidateToken.js'
 import validateUserForDelete from '../middlewares/validateUserForDelete.js'
 import { postSchema } from '../schemas/PostSchema.js'
+import { commentSchema } from '../schemas/CommentSchema.js'
 
 const postRouter = Router()
 
@@ -14,7 +15,7 @@ postRouter.post("/posts/liked", postLiked)
 postRouter.put("/posts/:postId", validateToken, editPost)
 postRouter.delete("/posts/:postId", validateToken, validateUserForDelete, deletePost)
 postRouter.get("/posts/comments/:postId", validateToken, getComments)
-postRouter.post("/posts/comments", validateToken, addComment)
+postRouter.post("/posts/comments", validateToken, validateSchema(commentSchema), addComment)
 postRouter.post("/posts/share", sharePost)
 
 export default postRouter
