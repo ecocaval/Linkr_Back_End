@@ -111,8 +111,17 @@ export async function removeLikeFromPost(userId, postId) {
 
 export async function getPostComments(postId) {
     return await connection.query(`
-        SELECT * FROM comments
-        WHERE post_id = $1
+        SELECT
+            c.id,
+            c.description,
+            c.user_id,
+            c.post_id,
+            u.name AS user_name,
+            u.picture_url AS user_photo
+        FROM comments AS c
+        JOIN users AS u
+            ON c.user_id = u.id
+        WHERE c.post_id = $1;
     `, [postId]);
 }
 
