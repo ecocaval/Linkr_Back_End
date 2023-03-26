@@ -72,7 +72,7 @@ export async function getPosts(req, res) {
                     url: urlInfos.url,
                     title: urlInfos.title,
                     description: urlInfos.description,
-                    image: urlInfos.images[0],
+                    image: urlInfos?.images ? urlInfos?.images[0] : null,
                 },
             });
         }

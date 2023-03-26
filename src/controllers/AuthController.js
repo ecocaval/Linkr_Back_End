@@ -19,6 +19,7 @@ export async function signUp(req, res) {
 		})
 		res.sendStatus(201);
 	} catch (err) {
+		console.log(err)
 		res.status(500).send(err.message);
 	}
 }
@@ -44,6 +45,7 @@ export async function signIn(req, res) {
 		)
 		res.send({ token, userId });
 	} catch (err) {
+		console.log(err)
 		res.status(500).send(err.message);
 	}
 }
