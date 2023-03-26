@@ -1,7 +1,7 @@
 import connection from "../config/database.connection.js";
 
 export async function insertPost(id, description, link) {
-    if (!id || !description || !link) return
+    if (!id || !link) return
     return await connection.query(`
         INSERT INTO posts (user_id, description, link)
         VALUES ($1, $2, $3) 

@@ -9,7 +9,7 @@ export async function publishPost(req, res) {
     const { description, link } = req.body
 
     try {
-        const { rows: [{ id: post_id }] } = await insertPost(id, description, link)
+        await insertPost(id, description, link)
         if (description !== "") {
 
             const hashtags = description
