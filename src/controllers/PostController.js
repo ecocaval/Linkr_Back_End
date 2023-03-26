@@ -2,6 +2,7 @@ import { getLinkPreview } from "link-preview-js";
 import { addLikeToPost, addNewComment, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, postExists, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById, userExists } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
+import { checkForDuplicity } from "../utils/checkDuplicity.js";
 
 export async function publishPost(req, res) {
     const { userId: id } = req.locals
@@ -51,7 +52,7 @@ export async function getPosts(req, res) {
 
         for (let i = 0; i < posts.rows.length; i++) {
             const urlInfos = await getLinkPreview(posts.rows[i].link);
-            const likesCount = await selectLikesCountByPostId(posts.rows[i].id)
+            const { rows: [{ count: likesCount, usersThatLiked }], } = await selectLikesCountByPostId(posts.rows[i].id)
             const user = await selectUserById(posts.rows[i].user_id)
             const sharedUser = await selectUserById(posts.rows[i].shared_user_id)
 
@@ -64,8 +65,9 @@ export async function getPosts(req, res) {
                 postDesc: posts.rows[i].description,
                 isShared: posts.rows[i].is_shared,
                 sharedUser: sharedUser.rowCount === 0 ? null : sharedUser.rows[0].name,
-                likesCount: likesCount.rows[0].count,
+                likesCount: likesCount,
                 likedByUser: posts.rows[i].likedByUser,
+                usersThatLiked: usersThatLiked ? usersThatLiked : [],
                 linkData: {
                     url: urlInfos.url,
                     title: urlInfos.title,
@@ -78,7 +80,7 @@ export async function getPosts(req, res) {
         console.error(e);
         return res.status(500).send(e.message)
     }
-    return res.status(200).send(data);
+    return res.status(200).send(checkForDuplicity(data));
 }
 
 export async function getPostById(postId) {
@@ -96,7 +98,7 @@ export async function editPost(req, res) {
     const { description } = req.body
     if (!description) return res.sendStatus(204)
     try {
-        const {rowCount: updatedSucessFully} = await updatePostById(postId, description)
+        const { rowCount: updatedSucessFully } = await updatePostById(postId, description)
         if (!updatedSucessFully) return res.sendStatus(404);
         return res.sendStatus(200);
     } catch (error) {
@@ -180,7 +182,7 @@ export async function addComment(req, res) {
         // check if user and post exists
         let user = await userExists(user_id)
         let post = await postExists(post_id)
-        if(user.rows.length === 0 || post.rows.length === 0) return res.sendStatus(404)
+        if (user.rows.length === 0 || post.rows.length === 0) return res.sendStatus(404)
 
         await addNewComment(description, post_id, user_id)
 
@@ -194,10 +196,10 @@ export async function sharePost(req, res) {
     const { userId, postId } = req.body
 
     try {
-        const {rows: [{user_id: sharedUserId, description, link}]} = await getSharePost(postId)
+        const { rows: [{ user_id: sharedUserId, description, link }] } = await getSharePost(postId)
         await insertSharePost(sharedUserId, description, link, userId, postId)
 
-        res.send({userId, postId})
+        res.send({ userId, postId })
     } catch (error) {
         console.log(error)
         res.status(500).send(error.message)
