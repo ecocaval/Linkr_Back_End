@@ -93,7 +93,10 @@ CREATE TABLE public.posts (
     user_id integer NOT NULL,
     description character varying(280) NOT NULL,
     link text NOT NULL,
-    date timestamp without time zone DEFAULT now() NOT NULL
+    date timestamp without time zone DEFAULT now() NOT NULL,
+    is_shared boolean DEFAULT false NOT NULL,
+    shared_user_id integer,
+    shared_post_id integer
 );
 
 
@@ -177,38 +180,6 @@ CREATE SEQUENCE public.posts_likes_id_seq
 --
 
 ALTER SEQUENCE public.posts_likes_id_seq OWNED BY public.posts_likes.id;
-
-
---
--- Name: shared_posts; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.shared_posts (
-    id integer NOT NULL,
-    user_id integer NOT NULL,
-    shared_post_id integer NOT NULL,
-    date timestamp without time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: shared_posts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.shared_posts_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: shared_posts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.shared_posts_id_seq OWNED BY public.shared_posts.id;
 
 
 --
@@ -311,13 +282,6 @@ ALTER TABLE ONLY public.posts_likes ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- Name: shared_posts id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.shared_posts ALTER COLUMN id SET DEFAULT nextval('public.shared_posts_id_seq'::regclass);
-
-
---
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -357,12 +321,6 @@ ALTER TABLE ONLY public.users_followers ALTER COLUMN id SET DEFAULT nextval('pub
 
 --
 -- Data for Name: posts_likes; Type: TABLE DATA; Schema: public; Owner: -
---
-
-
-
---
--- Data for Name: shared_posts; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -412,13 +370,6 @@ SELECT pg_catalog.setval('public.posts_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.posts_likes_id_seq', 1, false);
-
-
---
--- Name: shared_posts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.shared_posts_id_seq', 1, false);
 
 
 --
@@ -473,14 +424,6 @@ ALTER TABLE ONLY public.posts_likes
 
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_pkey PRIMARY KEY (id);
-
-
---
--- Name: shared_posts shared_posts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.shared_posts
-    ADD CONSTRAINT shared_posts_pkey PRIMARY KEY (id);
 
 
 --
@@ -548,27 +491,27 @@ ALTER TABLE ONLY public.posts_likes
 
 
 --
+-- Name: posts posts_shared_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.posts
+    ADD CONSTRAINT posts_shared_post_id_fkey FOREIGN KEY (shared_post_id) REFERENCES public.posts(id);
+
+
+--
+-- Name: posts posts_shared_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.posts
+    ADD CONSTRAINT posts_shared_user_id_fkey FOREIGN KEY (shared_user_id) REFERENCES public.users(id);
+
+
+--
 -- Name: posts posts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: shared_posts shared_posts_shared_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.shared_posts
-    ADD CONSTRAINT shared_posts_shared_post_id_fkey FOREIGN KEY (shared_post_id) REFERENCES public.posts(id);
-
-
---
--- Name: shared_posts shared_posts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.shared_posts
-    ADD CONSTRAINT shared_posts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
