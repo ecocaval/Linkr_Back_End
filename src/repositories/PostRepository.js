@@ -12,17 +12,18 @@ export async function insertPost(id, description, link) {
 export async function selectPosts(postsOffset, userId) {
     if (!userId) return
     return await connection.query(`
-        SELECT DISTINCT p.* ,
+        SELECT p.*,
         CASE 
-            WHEN pl.user_id = $1 THEN true
-            ELSE false
+            WHEN MAX(CASE WHEN pl.user_id = $1 THEN 1 ELSE 0 END) = 1 THEN true 
+            ELSE false 
         END AS "likedByUser"
         FROM posts p
-        LEFT JOIN posts_likes pl
+        LEFT JOIN posts_likes pl 
             ON pl.post_id = p.id
-        JOIN users_followers uf
+        JOIN users_followers uf 
             ON ((uf.follower_id = $1 AND uf.followed_id = p.user_id) OR p.user_id = $1)
-        ORDER BY id DESC 
+        GROUP BY p.id
+        ORDER BY p.id DESC
         LIMIT 10
         OFFSET $2;
     `, [userId, postsOffset ? 10 * postsOffset : postsOffset]);
@@ -40,42 +41,42 @@ export async function selectPostById(postId) {
 export async function selectPostsByUserId(idToGet, userId) {
     if (!userId) return []
     return await connection.query(`
-        SELECT DISTINCT p.* ,
-        CASE 
-            WHEN pl.user_id = $2 THEN true
-            ELSE false
-        END AS "likedByUser"
+        SELECT p.*,
+            CASE WHEN MAX(CASE WHEN pl.user_id = $2 THEN 1 ELSE 0 END) = 1 THEN true ELSE false END AS "likedByUser"
         FROM posts p
-        LEFT JOIN posts_likes pl
-            ON pl.post_id = p.id
-        WHERE p.user_id = $1 
-        ORDER BY id DESC; 
+        LEFT JOIN posts_likes pl ON pl.post_id = p.id
+        WHERE p.user_id = $1
+        GROUP BY p.id
+        ORDER BY p.id DESC;
     `, [idToGet, userId]);
 }
 
 export async function selectPostsByHashtag(hashtag, userId) {
     if (!hashtag) return []
     return await connection.query(`
-        SELECT DISTINCT p.* ,
-        CASE 
-            WHEN pl.user_id = $2 THEN true
-            ELSE false
-        END AS "likedByUser"
+        SELECT p.*,
+            CASE WHEN MAX(CASE WHEN pl.user_id = $2 THEN 1 ELSE 0 END) = 1 THEN true ELSE false END AS "likedByUser"
         FROM posts p
-        LEFT JOIN posts_likes pl
-            ON pl.post_id = p.id
-        WHERE description LIKE $1 
-        ORDER BY id DESC; 
+        LEFT JOIN posts_likes pl ON pl.post_id = p.id
+        WHERE description LIKE $1
+        GROUP BY p.id
+        ORDER BY p.id DESC;
     `, [`%#${hashtag}%`, userId]);
 }
 
 export async function selectLikesCountByPostId(postId) {
     if (!postId) return []
-    return await connection.query(`
-        SELECT count(*) 
-        FROM posts_likes 
-        WHERE post_id = $1;
+    const response = await connection.query(`
+        SELECT count(pl.*), ARRAY_AGG(JSON_BUILD_OBJECT(
+            'user_id', u.id,
+            'name', u.name
+        )) as "usersThatLiked"
+        FROM posts_likes pl
+        LEFT JOIN users u
+            ON pl.user_id = u.id
+        WHERE pl.post_id = $1;
     `, [postId]);
+    return response
 }
 
 export async function selectPostsLikes(userId, postId) {
@@ -132,16 +133,6 @@ export async function getPostComments(postId) {
             ON c.user_id = u.id
         WHERE c.post_id = $1;
     `, [postId]);
-}
-
-
-export async function getPostsById(userId) {
-    if (!userId) return []
-    return await connection.query(`
-        SELECT * 
-        FROM posts 
-        WHERE user_id = $1;
-    `, [userId]);
 }
 
 export async function getSharePost(postId) {
