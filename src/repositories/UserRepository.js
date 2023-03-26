@@ -44,3 +44,11 @@ export async function selectFollow(myId, userId) {
         SELECT * FROM users_followers WHERE follower_id = $1 AND followed_id = $2
     `, [myId, userId])
 }
+
+export async function userFollowing(userId) {
+    return await connection.query(`
+        SELECT follower_id, followed_id 
+        FROM users_followers 
+        WHERE follower_id= $1;
+    `, [userId])
+}

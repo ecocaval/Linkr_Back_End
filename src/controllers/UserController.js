@@ -4,6 +4,7 @@ import {
   selectFollow,
   selectUserById,
   selectUsers,
+  userFollowing,
 } from "../repositories/UserRepository.js";
 
 export async function getUsers(req, res) {
@@ -81,6 +82,17 @@ export async function followStatus(req, res) {
 
   try {
     const { rowCount } = await selectFollow(follower_id, followed_id);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+export async function getFollowers(req, res) {
+  const { userId } = req.params
+
+  try {
+    const data = await userFollowing(userId);
+    res.status(200).send(data.rows)
   } catch (error) {
     res.status(500).send(error);
   }
