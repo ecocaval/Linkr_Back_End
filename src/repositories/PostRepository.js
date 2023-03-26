@@ -37,27 +37,36 @@ export async function selectPostById(postId) {
     `, [postId]);
 }
 
-export async function selectPostsByUserId(userId) {
+export async function selectPostsByUserId(idToGet, userId) {
     if (!userId) return []
     return await connection.query(`
-        SELECT * 
-        FROM posts 
-        WHERE user_id = $1 
-        ORDER BY id DESC 
-        LIMIT 20;
-    `, [userId]);
+        SELECT DISTINCT p.* ,
+        CASE 
+            WHEN pl.user_id = $2 THEN true
+            ELSE false
+        END AS "likedByUser"
+        FROM posts p
+        LEFT JOIN posts_likes pl
+            ON pl.post_id = p.id
+        WHERE p.user_id = $1 
+        ORDER BY id DESC; 
+    `, [idToGet, userId]);
 }
 
-export async function selectPostsByHashtag(hashtag) {
+export async function selectPostsByHashtag(hashtag, userId) {
     if (!hashtag) return []
     return await connection.query(`
-        SELECT * 
-        FROM posts 
-        WHERE description 
-        LIKE $1 
-        ORDER BY id DESC 
-        LIMIT 20;
-    `, [`%#${hashtag}%`]);
+        SELECT DISTINCT p.* ,
+        CASE 
+            WHEN pl.user_id = $2 THEN true
+            ELSE false
+        END AS "likedByUser"
+        FROM posts p
+        LEFT JOIN posts_likes pl
+            ON pl.post_id = p.id
+        WHERE description LIKE $1 
+        ORDER BY id DESC; 
+    `, [`%#${hashtag}%`, userId]);
 }
 
 export async function selectLikesCountByPostId(postId) {
