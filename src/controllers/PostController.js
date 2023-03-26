@@ -45,8 +45,8 @@ export async function getPosts(req, res) {
     try {
         let posts
 
-        if (hashtag) posts = await selectPostsByHashtag(hashtag)
-        else if (id) posts = await selectPostsByUserId(id)
+        if (hashtag) posts = await selectPostsByHashtag(hashtag, userId)
+        else if (id) posts = await selectPostsByUserId(id, userId)
         else posts = await selectPosts(postsOffset, userId)
 
         for (let i = 0; i < posts.rows.length; i++) {
