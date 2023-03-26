@@ -91,7 +91,7 @@ ALTER SEQUENCE public.hashtags_id_seq OWNED BY public.hashtags.id;
 CREATE TABLE public.posts (
     id integer NOT NULL,
     user_id integer NOT NULL,
-    description character varying(280) NOT NULL,
+    description character varying(280),
     link text NOT NULL,
     date timestamp without time zone DEFAULT now() NOT NULL,
     is_shared boolean DEFAULT false NOT NULL,
