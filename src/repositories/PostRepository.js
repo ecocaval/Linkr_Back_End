@@ -11,22 +11,24 @@ export async function insertPost(id, description, link) {
 
 export async function selectPosts(postsOffset, userId) {
     if (!userId) return
-    return await connection.query(`
+    const response = await connection.query(`
         SELECT p.*,
-        CASE 
-            WHEN MAX(CASE WHEN pl.user_id = $1 THEN 1 ELSE 0 END) = 1 THEN true 
-            ELSE false 
+        CASE
+            WHEN MAX(CASE WHEN pl.user_id = $1 THEN 1 ELSE 0 END) = 1 THEN true
+            ELSE false
         END AS "likedByUser"
         FROM posts p
-        LEFT JOIN posts_likes pl 
-            ON pl.post_id = p.id
-        JOIN users_followers uf 
-            ON ((uf.follower_id = $1 AND uf.followed_id = p.user_id) OR p.user_id = $1)
+        LEFT JOIN posts_likes pl ON pl.post_id = p.id
+        LEFT JOIN users u ON u.id = p.user_id
+        LEFT JOIN users_followers uf 
+            ON (uf.follower_id = $1 AND uf.followed_id = p.user_id) OR p.user_id = $1
+        WHERE p.user_id = $1 OR uf.follower_id IS NOT NULL
         GROUP BY p.id
         ORDER BY p.id DESC
         LIMIT 10
         OFFSET $2;
     `, [userId, postsOffset ? 10 * postsOffset : postsOffset]);
+    return response
 }
 
 export async function selectPostById(postId) {
