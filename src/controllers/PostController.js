@@ -1,5 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
-import { addLikeToPost, addNewComment, deletePostById, getPostComments, getPostsById, getSharePost, insertPost, insertSharePost, postExists, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById, userExists } from "../repositories/PostRepository.js";
+import { addLikeToPost, addNewComment, deletePostById, getPostComments, getSharePost, insertPost, insertSharePost, postExists, removeLikeFromPost, selectLikesCountByPostId, selectPostById, selectPosts, selectPostsByHashtag, selectPostsByUserId, selectPostsLikes, updatePostById, userExists } from "../repositories/PostRepository.js";
 import { createHashtag, decreaseHashtagMentionsCount, linkPostToHashtag, selectHashtagsByName, selectHashtagsIdFromPost, updateHashtagMentionsByName } from "../repositories/HashtagRepository.js";
 import { selectUserById } from "../repositories/UserRepository.js";
 import { checkForDuplicity } from "../utils/checkDuplicity.js";

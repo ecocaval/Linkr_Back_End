@@ -135,16 +135,6 @@ export async function getPostComments(postId) {
     `, [postId]);
 }
 
-
-export async function getPostsById(userId) {
-    if (!userId) return []
-    return await connection.query(`
-        SELECT * 
-        FROM posts 
-        WHERE user_id = $1;
-    `, [userId]);
-}
-
 export async function getSharePost(postId) {
     if (!postId) return
     return await connection.query(`
